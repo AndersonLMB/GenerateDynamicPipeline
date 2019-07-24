@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using ESRI.ArcGIS.Carto;
+using ESRI.ArcGIS.Display;
 using ESRI.ArcGIS.Geodatabase;
 using System.IO;
 using ESRI.ArcGIS.DataSourcesFile;
@@ -21,6 +22,11 @@ namespace GenerateDynamicPipeline
             ESRI.ArcGIS.RuntimeManager.BindLicense(ESRI.ArcGIS.ProductCode.EngineOrDesktop);
             CommandLineApplication.Execute<Program>(args);
         }
+
+
+
+        [Option(ShortName = "m", LongName = "Mode")]
+        public Mode Mode { get; set; } = Mode.Mxd;
 
         [Option(ShortName = "dst", LongName = "DataSourceType")]
         public DataSourceType DataSourceType { get; set; } = DataSourceType.Gdb;
@@ -148,14 +154,81 @@ namespace GenerateDynamicPipeline
             catch (Exception)
             {
             }
+            switch (Mode)
+            {
+                case Mode.Data:
+                    GenerateAnimationLines(
+                      featureClass: featureClass,
+                      outFeatureClass: outFeatureClass,
+                      spatialReference: Get3857Sr(),
+                      frameRate: FrameRate,
+                      lineLengthInPixel: LineLength,
+                      intervalInPixel: Interval);
+                    break;
+                case Mode.Mxd:
+                    ModifyMxd(outFeatureClass, scales, spatialReference);
+                    break;
+                default:
+                    break;
+            }
 
-            GenerateAnimationLines(
-              featureClass: featureClass,
-              outFeatureClass: outFeatureClass,
-              spatialReference: Get3857Sr(),
-              frameRate: FrameRate,
-              lineLengthInPixel: LineLength,
-              intervalInPixel: Interval);
+
+
+
+        }
+
+        public void ModifyMxd(IFeatureClass outFeatureClass, double[] scales, ISpatialReference spatialReference)
+        {
+            var fi = new FileInfo("animation.mxd");
+            IMapDocument mapDocument = new MapDocumentClass();
+            mapDocument.Open(fi.FullName);
+            IMap map = mapDocument.Map[0];
+            ILayer layerToDelete = null;
+            while ((layerToDelete = map.Layers.Next()) != null)
+            {
+                map.DeleteLayer(layerToDelete);
+            }
+            mapDocument.Save();
+            mapDocument.Map[0].SpatialReference = spatialReference;
+            mapDocument.Save();
+            foreach (double scale in scales)
+            {
+                ILayer layer = new FeatureLayerClass();
+                layer.Name = $"scale{scale}";
+                layer.SpatialReference = spatialReference;
+                layer.MaximumScale = scale - 1;
+                layer.MinimumScale = scale + 1;
+                ((IFeatureLayer)layer).FeatureClass = outFeatureClass;
+                ISimpleRenderer renderer = new SimpleRendererClass()
+                {
+
+                    Symbol = new SimpleLineSymbolClass()
+                    {
+                        Color = new RgbColorClass()
+                        {
+                            Red = 0,
+                            Green = 0,
+                            Blue = 255
+                        },
+
+                    }
+                };
+                ((IGeoFeatureLayer)layer).Renderer = renderer as IFeatureRenderer;
+                mapDocument.Map[0].AddLayer(layer);
+                mapDocument.Save();
+            }
+            mapDocument.Save();
+            var mlc = map.LayerCount;
+            var lc = mapDocument.Map[0].LayerCount;
+            ; ;
+
+            //var mlc = map.LayerCount;
+
+            //var mdmlc = mapDocument.Map[0].LayerCount;
+            //mapDocument.SaveAs($"map{DateTime.Now.ToBinary()}.mxd");
+
+
+            ;
         }
 
         private ISpatialReference Get3857Sr()
@@ -198,6 +271,9 @@ namespace GenerateDynamicPipeline
                 }
                 ;
             }
+
+
+
         }
 
         private void ProcessPolyline(IPolyline polyline, IFeatureClass outFeatureClass, int scale, int frameRate = 60, double lineLengthInPixel = 5, double intervalInPixel = 10, ISpatialReference spatialReference = null)
@@ -298,5 +374,10 @@ namespace GenerateDynamicPipeline
     enum DataSourceType
     {
         Sde, Gdb, Shp
+    }
+
+    enum Mode
+    {
+        Data, Mxd
     }
 }
