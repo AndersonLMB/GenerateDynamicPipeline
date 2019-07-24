@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28010.2036
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenerateDynamicPipeline", "GenerateDynamicPipeline\GenerateDynamicPipeline.csproj", "{E98DBA3F-94DB-4A16-953F-4BFC7707B10A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SplitTest", "SplitTest\SplitTest.csproj", "{E3A7374C-E893-42A2-BBEE-563066ACD908}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{E98DBA3F-94DB-4A16-953F-4BFC7707B10A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E98DBA3F-94DB-4A16-953F-4BFC7707B10A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E98DBA3F-94DB-4A16-953F-4BFC7707B10A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E3A7374C-E893-42A2-BBEE-563066ACD908}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E3A7374C-E893-42A2-BBEE-563066ACD908}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E3A7374C-E893-42A2-BBEE-563066ACD908}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E3A7374C-E893-42A2-BBEE-563066ACD908}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

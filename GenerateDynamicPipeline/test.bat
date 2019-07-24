@@ -1,0 +1,1 @@
+GenerateDynamicPipeline -dst Gdb -ds C:\test\test.gdb -fcn test -odst Gdb -ods C:\test\test.gdb -ofcn out -pf proj3857.prj -sc Scales.txt -ll 30 -i 60 -fr 5 -ff FRAME -fs SCALE 

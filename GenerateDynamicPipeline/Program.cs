@@ -38,7 +38,7 @@ namespace GenerateDynamicPipeline
         public string OutDataSource { get; set; } = @"C:\test\test.gdb";
 
         [Option(ShortName = "ofcn", LongName = "OutFeatureClassName")]
-        public string OutFeatureClassName { get; set; } = "outpolyline";
+        public string OutFeatureClassName { get; set; } = "out";
 
 
         [Option(ShortName = "pf", LongName = "ProjectionFile")]
@@ -215,34 +215,20 @@ namespace GenerateDynamicPipeline
 
                 for (int frame = 0; frame < frameRate; frame++)
                 {
+
                     Console.WriteLine($"SCALE:{scale}, FRAME:{frame}");
                     double startLengthOfEachDrawLine = 0 + (((double)frame) / ((double)frameRate)) * intervalLength;
                     while (startLengthOfEachDrawLine < polyline.Length)
                     {
-                        IPoint startPoint = new PointClass();
-                        polyline.QueryPoint(esriSegmentExtension.esriExtendAtFrom, startLengthOfEachDrawLine, false, startPoint);
-
-                        IPoint endPoint = new PointClass();
                         var endPointLength = startLengthOfEachDrawLine + lineLength;
                         if (endPointLength >= polyline.Length)
                         {
-                            endPoint = polyline.ToPoint;
+                            endPointLength = polyline.Length;
                         }
-                        else
-                        {
-                            polyline.QueryPoint(esriSegmentExtension.esriExtendAtFrom, endPointLength, false, endPoint);
-
-                        }
-
-                        IPolyline newPolyline = new PolylineClass();
-                        newPolyline.FromPoint = startPoint;
-                        newPolyline.ToPoint = endPoint;
-                        newPolyline.SpatialReference = spatialReference;
-                        //Console.WriteLine($"{newPolyline.FromPoint.X} {newPolyline.FromPoint.Y}");
-                        //Console.WriteLine($"{newPolyline.ToPoint.X} {newPolyline.ToPoint.Y}");
+                        polyline.GetSubcurve(startLengthOfEachDrawLine, endPointLength, false, out ICurve curve);
                         IFeature createdFeature = outFeatureClass.CreateFeature();
-
-                        createdFeature.Shape = newPolyline;
+                        createdFeature.Shape.SpatialReference = spatialReference;
+                        createdFeature.Shape = (IPolyline)curve;
                         if (_indexOfFieldFrame >= 0)
                         {
                             try
